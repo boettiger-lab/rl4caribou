@@ -1,0 +1,11 @@
+[project]
+name = "rl4caribou"
+version = "1.0.0"
+
+dependencies = ["gymnasium",
+                "numpy",
+                "matplotlib",
+                "typing"]
+
+[project.optional-dependencies]
+tests = ["pytest", "pytest-cov", "stable_baselines3"]
