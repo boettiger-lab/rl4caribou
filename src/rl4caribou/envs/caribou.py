@@ -2,7 +2,7 @@ import gymnasium as gym
 import numpy as np
 
 # pop = elk, caribou, wolves
-# Caribou Scenario
+# Population dynamics
 def dynamics(pop, effort, harvest_fn, p, timestep=1):
     pop = harvest_fn(pop, effort)
     M, B, W = pop[0], pop[1], pop[2] # moose, caribou, wolf
@@ -31,25 +31,32 @@ def dynamics(pop, effort, harvest_fn, p, timestep=1):
         ),
     ])
 
+
+##
+## Param vals taken from https://doi.org/10.1016/j.ecolmodel.2019.108891
+##
+am = {"current": 15.32, "full_rest": 11.00}
+ab = {"current": 51.45, "full_rest": 26.39}
+
 parameters = {
-    "r_m": np.float32(1),
-    "r_b": np.float32(1),
+    "r_m": np.float32(0.39),
+    "r_b": np.float32(0.30),
     #
     "alpha_mm": np.float32(1),
     "alpha_bb": np.float32(1),
     "alpha_bm": np.float32(1),
     "alpha_mb": np.float32(1),
     #
-    "a_M": np.float32(1),
-    "a_B": np.float32(1),
+    "a_M": am["current"],
+    "a_B": ab["current"],
     #
-    "K_m": np.float32(1),
-    "K_b": np.float32(1),
+    "K_m": np.float32(1.1),
+    "K_b": np.float32(0.40),
     #
-    "h_M": np.float32(1),
-    "h_B": np.float32(1),
+    "h_M": np.float32(0.112),
+    "h_B": np.float32(0.112),
     #
-    "x": np.float32(1),
+    "x": np.float32(2),
     "u": np.float32(1),
     "d": np.float32(1),
     #
@@ -59,6 +66,9 @@ parameters = {
 }
 
 
+##
+## Harvest, utility
+##
 def harvest(pop, effort):
     q0 = 0.5  # catchability coefficients -- erradication is impossible
     q2 = 0.5
@@ -73,7 +83,6 @@ def utility(pop, effort):
     if np.any(pop <= 0.01):
         benefits -= 1
     return benefits - costs
-
 
 class Caribou(gym.Env):
     """A 3-species ecosystem model with two control actions"""
