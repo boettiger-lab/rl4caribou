@@ -1,14 +1,13 @@
 **Equations**
 
-Wolves:
-$$dW/dt = W(\frac{B^x a_B}{1 + M^x h_M aM + B^x h_B a_B} + \frac{u a_M M^x)}{1 + M^x h_M aM + B^x h_B a_B} - d - \omega)$$
-
-Caribou:
-
-$$dB/dt = B(r_b- \frac{r_b \alpha_{bb} B}{K_b}- \frac{B^{x - 1} W a_B}{1 + M^x h_M a_M + B^x h_B a_B} - \frac{r_b \alpha_{bm}  M}{K_b})$$
-
 Moose:
 $$dM/dt = M (r_m - \frac{(r_m \alpha_{mm} M)}{K_m} - \frac{(M^{x - 1} W a_M)}{(1 + B^x h_B a_B + M^x h_M a_M)} - \frac{(r_m \alpha_{mb} B)}{K_m} - \mu)$$
+
+Caribou:
+$$dB/dt = B(r_b- \frac{r_b \alpha_{bb} B}{K_b}- \frac{B^{x - 1} W a_B}{1 + M^x h_M a_M + B^x h_B a_B} - \frac{r_b \alpha_{bm}  M}{K_b})$$
+
+Wolves:
+$$dW/dt = W(\frac{B^x a_B}{1 + M^x h_M aM + B^x h_B a_B} + \frac{u a_M M^x)}{1 + M^x h_M aM + B^x h_B a_B} - d - \omega)$$
 
 **Parameter Definitions**
 
