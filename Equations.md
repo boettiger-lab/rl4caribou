@@ -5,7 +5,7 @@ $$dW/dt = W(\frac{B^x a_B}{1 + M^x h_M* aM + B^x h_B a_B} + \frac{u a_M M^x)}{1 
 
 Caribou:
 
-$dB/dt$ $= B$ $(rb$ $- \frac{rb*\alpha_{bb} *B}{Kb} - \frac{B^{x - 1}*W *aB}{1 + M^x*hM* aM + B^x*hB* aB} - \frac{rb*\alpha_{bm} *M}{Kb})$
+$dB/dt$ $= B$ $(rb$ $- \frac{rb*\alpha_{bb} *B}{Kb}$ $- \frac{B^{x - 1}*W *aB}{1 + M^x*hM* aM + B^x*hB* aB} - \frac{rb*\alpha_{bm} *M}{Kb})$
 
 Moose:
 $$dM/dt = M (rm - \frac{(rm*\alpha_{mm}*M)}{Km} - \frac{(M^{x - 1}*W *aM)}{(1 + B^x*hB* aB + M^x*hM* aM)} - \frac{(rm*\alpha_{mb}*B)}{Km} - \mu)$$
