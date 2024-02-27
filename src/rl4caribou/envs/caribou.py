@@ -1,68 +1,68 @@
+import gymnasium as gym
 import numpy as np
-
 
 # pop = elk, caribou, wolves
 # Caribou Scenario
 def dynamics(pop, effort, harvest_fn, p, timestep=1):
     pop = harvest_fn(pop, effort)
-    X, Y, Z = pop[0], pop[1], pop[2]
-
-    K = p["K"]  # - 0.2 * np.sin(2 * np.pi * timestep / 3200)
-    D = p["D"] + 0.5 * np.sin(2 * np.pi * timestep / 3200)
-    beta = p["beta"] + 0.2 * np.sin(2 * np.pi * timestep / 3200)
-
-    X += (
-        p["r_x"] * X * (1 - (X + p["tau_xy"] * Y) / K)
-        - (1 - D) * beta * Z * (X**2) / (p["v0"] ** 2 + X**2)
-        + p["sigma_x"] * X * np.random.normal()
-    )
-
-    Y += (
-        p["r_y"] * Y * (1 - (Y + p["tau_yx"] * X) / K)
-        - D * beta * Z * (Y**2) / (p["v0"] ** 2 + Y**2)
-        + p["sigma_y"] * Y * np.random.normal()
-    )
-
-    Z += (
-        p["alpha"]
-        * beta
-        * Z
-        * (
-            (1 - D) * (X**2) / (p["v0"] ** 2 + X**2)
-            + D * (Y**2) / (p["v0"] ** 2 + Y**2)
-        )
-        - p["dH"] * Z
-        + p["sigma_z"] * Z * np.random.normal()
-    )
-
-    pop = np.array([X, Y, Z], dtype=np.float32)
-    pop = np.clip(pop, [0, 0, 0], [np.Inf, np.Inf, np.Inf])
-    return pop
-
-
-initial_pop = [0.5, 0.5, 0.2]
+    M, B, W = pop[0], pop[1], pop[2] # moose, caribou, wolf
+    denominator  = (1 + B**x * p['h_B'] * p['a_B'] + M**x * p['h_M'] * p['a_M'])
+    
+    return np.float32([
+        M + M * (
+            p['r_m'] * (1 - p['alpha_mm'] * M / p['K_m'])
+            - M**(p['x'] - 1) * W * p['a_M'] / denominator
+            - p['r_m'] * p['alpha_mb'] * B / p['K_m']
+            + p['sigma_M'] * np.random.normal()
+        ),
+        #
+        B + B * (
+            p['r_b']  * (1 - p['alpha_bb'] * B / p['K_b'])
+            -  B**(p['x']-1) * W * p['a_B']  / denominator
+            - p['r_b'] * p['alpha_bm'] * M / p['K_b']
+            + p['sigma_B'] * np.random.normal()
+        ),
+        #
+        W + W * (
+            B**p['x'] * p['a_B'] /  denominator
+            M**p['x'] * p['a_M'] * p['u'] / denominator
+            - p['d']
+            + p['sigma_W'] * np.random.normal()
+        ),
+    ])
 
 parameters = {
-    "r_x": np.float32(0.13),
-    "r_y": np.float32(0.2),
-    "K": np.float32(1),
-    "beta": np.float32(0.1),
-    "v0": np.float32(0.1),
-    "D": np.float32(0.8),
-    "tau_yx": np.float32(0.7),
-    "tau_xy": np.float32(0.2),
-    "alpha": np.float32(0.4),
-    "dH": np.float32(0.03),
-    "sigma_x": np.float32(0.05),
-    "sigma_y": np.float32(0.05),
-    "sigma_z": np.float32(0.05),
+    "r_m": np.float32(1),
+    "r_b": np.float32(1),
+    #
+    "alpha_mm": np.float32(1),
+    "alpha_bb": np.float32(1),
+    "alpha_bm": np.float32(1),
+    "alpha_mb": np.float32(1),
+    #
+    "a_M": np.float32(1),
+    "a_B": np.float32(1),
+    #
+    "K_m": np.float32(1),
+    "K_b": np.float32(1),
+    #
+    "h_M": np.float32(1),
+    "h_B": np.float32(1),
+    #
+    "x": np.float32(1),
+    "u": np.float32(1),
+    "d": np.float32(1),
+    #
+    "sigma_M": np.float32(0.1),
+    "sigma_B": np.float32(0.1),
+    "sigma_W": np.float32(0.1),
 }
 
 
 def harvest(pop, effort):
     q0 = 0.5  # catchability coefficients -- erradication is impossible
     q2 = 0.5
-    pop[0] = pop[0] * (1 - effort[0] * q0)  # pop 0, elk
+    pop[0] = pop[0] * (1 - effort[0] * q0)  # pop 0, moose
     pop[2] = pop[2] * (1 - effort[1] * q2)  # pop 2, wolves
     return pop
 
@@ -73,9 +73,6 @@ def utility(pop, effort):
     if np.any(pop <= 0.01):
         benefits -= 1
     return benefits - costs
-
-
-import gymnasium as gym
 
 
 class Caribou(gym.Env):
@@ -90,7 +87,7 @@ class Caribou(gym.Env):
         self.threshold = config.get("threshold", np.float32(1e-4))
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
-        self.initial_pop = config.get("initial_pop", initial_pop)
+        self.initial_pop = config.get("initial_pop", np.ones(3, dtype=np.float32))
         self.parameters = config.get("parameters", parameters)
         self.dynamics = config.get("dynamics", dynamics)
         self.harvest = config.get("harvest", harvest)
