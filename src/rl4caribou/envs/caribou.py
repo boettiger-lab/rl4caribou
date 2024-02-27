@@ -104,7 +104,7 @@ class Caribou(gym.Env):
         self.observe = config.get(
             "observe", lambda state: state
         )  # default to perfectly observed case
-        self.bound = 2 * np.max(self.parameters["K_b"], self.parameters["K_m"])
+        self.bound = 2
 
         self.action_space = gym.spaces.Box(
             np.array([-1, -1], dtype=np.float32),
