@@ -6,7 +6,7 @@ import numpy as np
 def dynamics(pop, effort, harvest_fn, p, timestep=1):
     pop = harvest_fn(pop, effort)
     M, B, W = pop[0], pop[1], pop[2] # moose, caribou, wolf
-    denominator  = (1 + B**x * p['h_B'] * p['a_B'] + M**x * p['h_M'] * p['a_M'])
+    denominator  = (1 + B**p['x'] * p['h_B'] * p['a_B'] + M**p['x'] * p['h_M'] * p['a_M'])
     
     return np.float32([
         M + M * (
