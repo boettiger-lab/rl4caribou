@@ -25,7 +25,7 @@ def dynamics(pop, effort, harvest_fn, p, timestep=1):
         #
         W + W * (
             B**p['x'] * p['a_B'] /  denominator
-            M**p['x'] * p['a_M'] * p['u'] / denominator
+            + M**p['x'] * p['a_M'] * p['u'] / denominator
             - p['d']
             + p['sigma_W'] * np.random.normal()
         ),
