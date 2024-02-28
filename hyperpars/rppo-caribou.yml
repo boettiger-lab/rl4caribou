@@ -1,0 +1,12 @@
+# stable-baselines3 configuration template. 
+
+algo: "RPPO"
+env_id: "Caribou-v0"
+n_envs: 12
+tensorboard: "/home/rstudio/logs"
+total_timesteps: 1000000
+config: {}
+use_sde: True
+id: "1"
+repo: "cboettig/rl-ecology"
+save_path: "/home/rstudio/rl4greencrab/saved_agents"
