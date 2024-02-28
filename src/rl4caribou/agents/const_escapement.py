@@ -19,7 +19,7 @@ class constEsc:
     def predict(self, observation, **kwargs):
         obs_nat_units = self.bound * self.to_01(observation)
         m_mort = self.moose_mortality(obs_nat_units[0])
-        w_mort = self.wolf_mortality(obs_nat_units[3])
+        w_mort = self.wolf_mortality(obs_nat_units[2])
         mortality = np.float32([m_mort, w_mort])
         return self.to_pm1(mortality), {}
 
