@@ -1,0 +1,2 @@
+from rl4caribou.agents.const_escapement import constEsc
+from rl4caribou.agents.const_action import constAction
