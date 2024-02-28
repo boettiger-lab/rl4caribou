@@ -68,4 +68,4 @@ def sb3_train(config_file, **kwargs):
     model.save(save_id)
     print(f"Saved {options['algo']} model at {save_id}")
     
-    return model
+    return save_id, options
