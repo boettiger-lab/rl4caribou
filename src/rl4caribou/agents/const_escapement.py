@@ -2,9 +2,15 @@ import numpy as np
 
 class constEsc:
     def __init__(self, escapement_vec, env = None):
-        self.escapement_vec = np.clip(
+        #
+        # preprocess
+        if isinstance(escapement_vec, list):
+            escapement_vec = np.float32(escapement_vec)
+        escapement_vec = np.clip(
             escapement_vec, a_min = 0, a_max = None
         )
+        #
+        self.escapement_vec = escapement_vec
         self.env = env
         self.bound = 1
         if self.env is not None:
