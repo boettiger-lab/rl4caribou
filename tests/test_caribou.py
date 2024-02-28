@@ -1,5 +1,6 @@
 # Confirm environment is correctly defined:
 from stable_baselines3.common.env_checker import check_env
+import numpy as np
 from rl4caribou import Caribou
 from rl4caribou.agents import constAction, constEsc
 
