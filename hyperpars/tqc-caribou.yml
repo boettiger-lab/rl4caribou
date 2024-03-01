@@ -2,7 +2,7 @@
 
 algo: "TQC"
 env_id: "CaribouScipy"
-# n_envs: 12
+n_envs: 12
 tensorboard: "/home/rstudio/logs"
 total_timesteps: 500000
 config: {}
