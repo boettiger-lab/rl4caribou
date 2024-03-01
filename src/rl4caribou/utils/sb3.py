@@ -54,11 +54,11 @@ def sb3_train(config_file, **kwargs):
     save_id = os.path.join(options["save_path"], model_id)
 
     model = ALGO(
-        "MlpPolicy",
+        options.get("policyType", "MlpPolicy"),
         env,
         verbose=0,
         tensorboard_log=options["tensorboard"],
-        use_sde=options["use_sde"],
+        **{opt: options[opt] for opt in options if opt in ['use_sde']}, # oof, something nicer soon?
     )
 
     progress_bar = options.get("progress_bar", False)
