@@ -50,7 +50,9 @@ def sb3_train(config_file, **kwargs):
     else:
         env = gym.make(options["env_id"])
     ALGO = algorithm(options["algo"])
-    model_id = options["algo"] + "-" + options["env_id"]  + "-" + options["id"]
+    if "id" in options:
+        options["id"] = "-" + options["id"]
+    model_id = options["algo"] + "-" + options["env_id"]  + options.get("id", "")
     save_id = os.path.join(options["save_path"], model_id)
 
     model = ALGO(
