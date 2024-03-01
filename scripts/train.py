@@ -2,6 +2,7 @@
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="Path config file", type=str)
+parser.add_argument("-pb", "--progress_bar", help="Use  progress bar for training", type=bool)
 args = parser.parse_args()
 
 import rl4caribou
@@ -9,7 +10,7 @@ import rl4caribou
 # training
 #
 from rl4caribou.utils import sb3_train    
-model_save_id, train_options = sb3_train(args.file)
+model_save_id, train_options = sb3_train(args.file, progress_bar=args.progress_bar)
 
 # hugging face
 #

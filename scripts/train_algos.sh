@@ -4,7 +4,7 @@
 scriptdir="$(dirname "$0")"
 cd "$scriptdir"
 
-python train.py -f ../hyperpars/ppo-caribou &
-python train.py -f ../hyperpars/rppo-caribou &
-python train.py -f ../hyperpars/tqc-caribou &
-python train.py -f ../hyperpars/td3-caribou &
+python train.py -f ../hyperpars/ppo-caribou.yml &
+python train.py -f ../hyperpars/rppo-caribou.yml &
+python train.py -f ../hyperpars/tqc-caribou.yml &
+python train.py -f ../hyperpars/td3-caribou.yml &
