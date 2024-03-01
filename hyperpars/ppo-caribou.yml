@@ -3,10 +3,9 @@
 algo: "PPO"
 env_id: "CaribouScipy"
 config: {}
-n_envs: 12
+# n_envs: 12
 tensorboard: "/home/rstudio/logs"
-total_timesteps: 1000000
+total_timesteps: 500000
 use_sde: True
-id: "1"
 repo: "cboettig/rl-ecology"
 save_path: "/home/rstudio/rl4caribou/saved_agents"
