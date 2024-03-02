@@ -7,7 +7,8 @@ def dynamics_scipy(pop, effort, p, timestep, singularities):
     #
     # parameters of the ODE are s.t. t is in years, so lets make the time-step a tenth of a year
     # (this ad hoc rule gives better convergence than if we set dt = 1 full year)
-    t_interval = np.float32([timestep, timestep+1./12])
+    dt = 1./12
+    t_interval = np.float32([timestep, timestep+dt])
     y0 = pop 
     timestep_randomness = (
         np.float32(
@@ -15,7 +16,7 @@ def dynamics_scipy(pop, effort, p, timestep, singularities):
         ) *
         np.random.normal(size=3)
     )
-    return odeint(ode_func, y0, t_interval, args=(effort, p), tcrit=singularities)[1] + timestep_randomness
+    return odeint(ode_func, y0, t_interval, args=(effort, p), tcrit=singularities)[1] + timestep_randomness * dt
 
 def ode_func(y, t, effort, p):
     M, B, W = y
@@ -71,9 +72,9 @@ parameters = {
     "u": np.float32(1),
     "d": np.float32(1),
     #
-    "sigma_M": np.float32(0.1),
-    "sigma_B": np.float32(0.1),
-    "sigma_W": np.float32(0.1),
+    "sigma_M": np.float32(0.05),
+    "sigma_B": np.float32(0.05),
+    "sigma_W": np.float32(0.05),
 }
 #
 # computed using scipy's fsolve (coordinates where d Pops / dt = 0)
@@ -112,9 +113,9 @@ def harvest(pop, effort):
 
 
 def utility(pop, effort):
-    benefits = 5 * pop[1]  # benefit from Caribou
-    costs = 0.01 * (effort[0] + effort[1])  # cost to culling
-    if np.any(pop <= [0.03,  0.07, 1e-6]):
+    benefits = 1 * pop[1]  # benefit from Caribou
+    costs = 0.1 * (effort[0] + effort[1])  # cost to culling
+    if np.any(pop <= [0.03,  0.07, 1e-4]):
         benefits -= 1
     return benefits - costs
 
@@ -175,7 +176,7 @@ class CaribouScipy(gym.Env):
         reward = self.utility((pop+nextpop)/2., effort)
 
         self.timestep += 1
-        truncated = bool(self.timestep > self.Tmax) or bool(any(nextpop < 1e-7))
+        truncated = bool(self.timestep > self.Tmax) # or bool(any(nextpop < 1e-7))
         
         self.state = self.state_units(nextpop)  # transform into [-1, 1] space
         observation = self.observe(self.state)  # same as self.state
