@@ -1,0 +1,13 @@
+# stable-baselines3 configuration template. 
+
+algo: "RPPO"
+policyType: "MlpLstmPolicy"
+env_id: "CaribouScipy"
+n_envs: 12
+tensorboard: "/home/rstudio/logs"
+total_timesteps: 500000
+config: {}
+use_sde: True
+id: "1"
+repo: "cboettig/rl-ecology"
+save_path: "/home/rstudio/rl4caribou/saved_agents"
