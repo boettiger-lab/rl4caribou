@@ -1,11 +1,12 @@
 # Confirm environment is correctly defined:
 from stable_baselines3.common.env_checker import check_env
 import numpy as np
-from rl4caribou import Caribou
+from rl4caribou import Caribou, CaribouScipy
 from rl4caribou.agents import constAction, constEsc
 
 def test_Caribou():
     check_env(Caribou(), warn=True)
+    check_env(CaribouScipy(), warn=True)
 
 def test_constAction():
     ca1 = constAction(mortality_vec = [0,0])
