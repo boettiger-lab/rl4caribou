@@ -8,5 +8,5 @@ total_timesteps: 500000
 config: {}
 use_sde: True
 repo: "cboettig/rl-ecology"
-save_path: "/home/rstudio/rl4caribou/saved_agents"
+save_path: "../saved_agents"
 id: "2"
