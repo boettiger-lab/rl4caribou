@@ -6,5 +6,5 @@ config: {}
 tensorboard: "/home/rstudio/logs"
 total_timesteps: 500000
 id: "1"
-repo: "cboettig/rl-ecology"
+repo: "boettiger-lab/rl4eco"
 save_path: "/home/rstudio/rl4caribou/saved_agents"
