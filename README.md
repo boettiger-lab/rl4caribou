@@ -34,3 +34,10 @@ $$dW/dt = W(\frac{B^x a_B}{1 + M^x h_M aM + B^x h_B a_B} + \frac{u a_M M^x}{1 + 
 
 Here $\mu_t$ and $\omega_t$ are, respectively, the moose and wolf mortalities due to culling.
 The other parameters in the equations are estimated from empirical data in the reference.
+
+**Problem in plain language:** choose culling mortalities $\omega_t$ and $\mu_t$ such that 1. the caribou population can grow, 2. all three populations are maintained at a healthy level, 3. the cost of implementing the policy is as low as possible.
+
+We operationalize this problem in the following way: 
+
+First, we break down time into discrete timesteps representing one year.
+At each time-step, the manager observes the vector of populations $(M_t, B_t, W_t)$ and chooses an *action* $(\mu_t, \omega_t)$.
