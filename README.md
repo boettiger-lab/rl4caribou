@@ -41,3 +41,16 @@ We operationalize this problem in the following way:
 
 First, we break down time into discrete timesteps representing one year.
 At each time-step, the manager observes the vector of populations $(M_t, B_t, W_t)$ and chooses an *action* $(\mu_t, \omega_t)$.
+This action produces a *reward* based on the following utility funciton:
+
+```
+def utility(pop, effort):
+    # pop = [moose, caribou, wolf]
+    benefits = 1 * pop[1]  # benefit from Caribou
+    costs = 0.1 * (effort[0] + effort[1])  # cost to culling
+    if np.any(pop <= [0.03,  0.07, 1e-4]):
+        benefits -= 1 # penalty for having low densities
+    return benefits - costs
+```
+
+
