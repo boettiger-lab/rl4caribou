@@ -19,3 +19,18 @@ We consider three types of actions available to policy makers:
 1. **Seismic line restoration.** Restoring seismic lines to forest is an expensive policy which takes several years to have its effect felt, however it can greatly reduce the wolf-caribou predation rate on the long run.
 2. **Wolf culling.** A second, more direct, option is to cull wolves to bring their population density down.
 3. **Moose culling.** A third option is to cull moose---wolves' main source of food. Reducing moose population density effectively reduces the carrying capacity for the wolf population.
+
+We use a [community model from the literature](https://www.sciencedirect.com/science/article/abs/pii/S0304380019303990?casa_token=QHYvnZHBOLAAAAAA:pHqdBeT8mVzV3tCaIci_0Yxo3f8lFVcrGF8GaHMC2Ch_8YYD6NG-BfcD6g1eK1cn0kZRPYVxqg) to describe the population dynamics of the Moose - Caribou - Wolf system.
+The equations are as follow:
+
+Moose:
+$$dM/dt = M (r_m - \frac{(r_m \alpha_{mm} M)}{K_m} - \frac{(M^{x - 1} W a_M)}{(1 + B^x h_B a_B + M^x h_M a_M)} - \frac{(r_m \alpha_{mb} B)}{K_m} - \mu_t)$$
+
+Caribou:
+$$dB/dt = B(r_b- \frac{r_b \alpha_{bb} B}{K_b}- \frac{B^{x - 1} W a_B}{1 + M^x h_M a_M + B^x h_B a_B} - \frac{r_b \alpha_{bm}  M}{K_b})$$
+
+Wolves:
+$$dW/dt = W(\frac{B^x a_B}{1 + M^x h_M aM + B^x h_B a_B} + \frac{u a_M M^x}{1 + M^x h_M a_M + B^x h_B a_B} - d - \omega_t)$$.
+
+Here $\mu_t$ and $\omega_t$ are, respectively, the moose and wolf mortalities due to culling.
+The other parameters in the equations are estimated from empirical data in the reference.
