@@ -53,4 +53,6 @@ def utility(pop, effort):
     return benefits - costs
 ```
 
+**Technical problem statement:** maximize reward over a period of 100 timesteps by choosing an optimal *policy function* which chooses actions based on observing the population vector $(M_t, B_t, W_t)$.
+
 
