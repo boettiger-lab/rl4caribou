@@ -114,7 +114,7 @@ def harvest(pop, effort):
 
 def utility(pop, effort):
     benefits = 1 * pop[1]  # benefit from Caribou
-    costs = 0.1 * (effort[0] + effort[1])  # cost to culling
+    costs = 0.1 * (effort[0] + effort[1]) + 0.1 * effort[2]  # cost to culling + cost of restoring
     if np.any(pop <= [0.03,  0.07, 1e-4]):
         benefits -= 1
     return benefits - costs
@@ -132,7 +132,39 @@ class CaribouScipy(gym.Env):
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
         self.initial_pop = config.get("initial_pop", np.float32([0.3, 0.15, 0.05]))
-        self.parameters = config.get("parameters", parameters)
+        #
+        self.current_am = 15.32
+        self.restored_am = 11.00
+        self.current_ab = 51.45
+        self.restored_ab = 26.39
+        self.parameters = {
+            "r_m": config.get("r_m", np.float32(0.39)),
+            "r_b": config.get("r_b", np.float32(0.30)),
+            #
+            "alpha_mm": config.get("alpha_mm", np.float32(1)),
+            "alpha_bb": config.get("alpha_bb", np.float32(1)),
+            "alpha_bm": config.get("alpha_bm", np.float32(1)),
+            "alpha_mb": config.get("alpha_mb", np.float32(1)),
+            #
+            "a_M": self.current_am,
+            "a_B": self.current_ab,
+            #
+            "K_m": config.get("K_m", np.float32(1.1)),
+            "K_b": config.get("K_b", np.float32(0.40)),
+            #
+            "h_M": config.get("h_M", np.float32(0.112)),
+            "h_B": config.get("h_B", np.float32(0.112)),
+            #
+            "x": config.get("x", np.float32(2)),
+            "u": config.get("u", np.float32(1)),
+            "d": config.get("d", np.float32(1)),
+            #
+            "sigma_M": config.get("sigma_M", np.float32(0.05)),
+            "sigma_B": config.get("sigma_B", np.float32(0.05)),
+            "sigma_W": config.get("sigma_W", np.float32(0.05)),
+        }
+        self.a_restoration_change = config.get("a_restoration_change", 0.1)
+        #
         self.singularities = config.get("singularities", None)
         self.dynamics = config.get("dynamics", dynamics_scipy)
         self.harvest = config.get("harvest", harvest)
@@ -143,8 +175,8 @@ class CaribouScipy(gym.Env):
         self.bound = 2
 
         self.action_space = gym.spaces.Box(
-            np.array([-1, -1], dtype=np.float32),
-            np.array([1, 1], dtype=np.float32),
+            np.array([-1, -1, -1], dtype=np.float32),
+            np.array([1, 1, 1], dtype=np.float32),
             dtype=np.float32,
         )
         self.observation_space = gym.spaces.Box(
@@ -166,12 +198,17 @@ class CaribouScipy(gym.Env):
     def step(self, action):
         action = np.clip(action, self.action_space.low, self.action_space.high)
         pop = self.population_units()  # current state in natural units
-        effort = (action + 1.0) / 2
+        effort = (action + 1.0) / 2 # (moose_cull, wolf_cull, restoration_intensity)
 
         # harvest and recruitment
         nextpop = self.dynamics(
             pop, effort, self.parameters, self.timestep, singularities=self.singularities
         )
+        
+        # restoration
+        self.parameters["a_M"] = self.parameters["a_M"] - (self.parameters["a_M"] - self.restored_am) * effort[2] * self.a_restoration_change
+        self.parameters["a_B"] = self.parameters["a_B"] - (self.parameters["a_B"] - self.restored_ab) * effort[2] * self.a_restoration_change
+        
         ## linear approx to rewards
         reward = self.utility((pop+nextpop)/2., effort)
 
