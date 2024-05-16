@@ -47,37 +47,36 @@ def dynamics(pop, effort, harvest_fn, p, timestep=1):
 ##
 ## Param vals from notebooks/discrete_time.ipynmb experiments
 ##
-# am = {"current": 15.32, "full_rest": 11.00}
-# ab = {"current": 51.45, "full_rest": 26.39}
+
+am = {"current": 1, "full_rest": 0.5}
+ab = {"current": 5, "full_rest": 1}
 
 parameters = {
-    "r_m": np.float32(0.6),
-    "r_b": np.float32(0.6),
+    "r_m": np.float32(0.5),
+    "r_b": np.float32(0.45),
     #
     "alpha_mm": np.float32(0.1),
     "alpha_bb": np.float32(0.1),
-    "alpha_bm": np.float32(0.1),
-    "alpha_mb": np.float32(0.1),
+    "alpha_bm": np.float32(0.05),
+    "alpha_mb": np.float32(0.05),
     #
-    # "a_M": am["current"],
-    # "a_B": ab["current"],
-    "a_M": 1,
-    "a_B": 2,
+    "a_M": am["current"],
+    "a_B": ab["current"],
     #
     "K_m": np.float32(1.1),
     "K_b": np.float32(0.40),
     #
-    "h_M": np.float32(0.11),
-    "h_B": np.float32(0.11),
+    "h_B": np.float32(0.031),
+    "h_M": np.float32(0.31),
     #
     "x": np.float32(2),
     "u": np.float32(1),
-    "d": np.float32(1),
+    "d": np.float32(0.3),
     #
-    "sigma_M": np.float32(0.1),
-    "sigma_B": np.float32(0.2),
-    "sigma_W": np.float32(0.1),
-    "additive_sigma": np.float32(0.003),
+    "sigma_M": np.float32(0.2),
+    "sigma_B": np.float32(0.25),
+    "sigma_W": np.float32(0.2),
+    "additive_sigma": np.float32(0.005),
 }
 
 
@@ -124,7 +123,10 @@ class Caribou(gym.Env):
         self.threshold = config.get("threshold", np.float32(1e-3))
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
-        self.initial_pop = config.get("initial_pop", np.ones(3, dtype=np.float32))
+        self.initial_pop = config.get(
+            "initial_pop", 
+            np.float32([0.572079, 0.025453, 0.911731]),
+        )
         self.parameters = config.get("parameters", parameters)
         self.dynamics = config.get("dynamics", dynamics)
         self.harvest = config.get("harvest", harvest)
