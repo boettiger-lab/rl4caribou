@@ -1,15 +1,23 @@
 #!/opt/venv/bin/python
+
+# script args
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="Path config file", type=str)
 parser.add_argument("-pb", "--progress_bar", help="Use  progress bar for training", type=bool)
 args = parser.parse_args()
 
+# imports
 import rl4caribou
+from rl4caribou.utils import sb3_train, sb3_train_save_checkpoints
 
-## normalizing work directory 
-#
+# hf login
+from huggingface_hub import hf_hub_download, HfApi, login
+# login()
+
 import os
+
+# transform to absolute file path
 abs_filepath = os.path.abspath(args.file)
 
 # change directory to script's directory (since io uses relative paths)
@@ -17,17 +25,24 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
-# training
-#
-from rl4caribou.utils import sb3_train    
-model_save_id, train_options = sb3_train(abs_filepath, progress_bar=args.progress_bar)
+# train
+save_id, options = sb3_train_save_checkpoints(abs_filepath)
+fname = os.path.basename(save_id)
 
-# hugging face
-#
-if 'repo' in train_options:
-    from rl4caribou.utils import upload_to_hf
-    try:
-        upload_to_hf(abs_filepath, "sb3/"+args.file, repo=train_options['repo'])
-        upload_to_hf(model_save_id, "sb3/"+model_save_id+".zip", repo=train_options['repo'])
-    except:
-        print("Couldn't upload to hf!")
+# hf upload
+api = HfApi()
+try:
+    api.upload_file(
+        path_or_fileobj=save_id,
+        path_in_repo="sb3/rl4fisheries/"+fname,
+        repo_id="boettiger-lab/rl4eco",
+        repo_type="model",
+    )
+except Exception as ex:
+    print("Couldn't upload to hf :(.")
+    print(ex)
+
+print(f"""
+Finished training on input file {args.file}.
+
+""")
