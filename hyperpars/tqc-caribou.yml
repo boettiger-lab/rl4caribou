@@ -1,12 +1,47 @@
 # stable-baselines3 configuration
 
+# algo: "TQC"
+# env_id: "CaribouScipy"
+# n_envs: 12
+# tensorboard: "/home/rstudio/logs"
+# total_timesteps: 500000
+# config: {}
+# use_sde: True
+# repo: "boettiger-lab/rl4eco"
+# save_path: "../saved_agents"
+# id: "2"
+
 algo: "TQC"
+total_timesteps: 5000000
+algo_config:
+    tensorboard_log: "../../../logs"
+    #
+    policy: 'MlpPolicy'
+    # batch_size: 512
+    # gamma: 0.9999
+    # learning_rate: !!float 7.77e-05
+    # ent_coef: 0.00429
+    # clip_range: 0.1
+    # gae_lambda: 0.9
+    # max_grad_norm: 5
+    # vf_coef: 0.19
+    # use_sde: True
+    # policy_kwargs: "dict(log_std_init=-3.29, ortho_init=False, net_arch=[256, 128])"
+    # in policy_kwargs: net_arch=[400, 300]
+    # policy: 'MlpPolicy'
+    # use_sde: True
+    # policy_kwargs: "dict(log_std_init=-3, net_arch=[400, 300])"
+    # clip_range: 0.1
+
+# env
 env_id: "CaribouScipy"
-n_envs: 12
-tensorboard: "/home/rstudio/logs"
-total_timesteps: 500000
 config: {}
-use_sde: True
-repo: "boettiger-lab/rl4eco"
+n_envs: 12
+
+# io
+repo: "cboettig/rl-ecology"
 save_path: "../saved_agents"
-id: "2"
+
+# misc
+# id: ""
+additional_imports: ["torch"]

@@ -16,7 +16,9 @@ def dynamics_scipy(pop, effort, p, timestep, singularities):
         ) *
         np.random.normal(size=3)
     )
-    return odeint(ode_func, y0, t_interval, args=(effort, p), tcrit=singularities)[1] + timestep_randomness * dt
+    new_pop = odeint(ode_func, y0, t_interval, args=(effort, p), tcrit=singularities)[1]
+    
+    return new_pop + timestep_randomness * dt
 
 def ode_func(y, t, effort, p):
     M, B, W = y
@@ -114,10 +116,17 @@ def harvest(pop, effort):
 
 def utility(pop, effort):
     benefits = 1 * pop[1]  # benefit from Caribou
-    costs = 0.1 * (effort[0] + effort[1]) + 0.1 * effort[2]  # cost to culling + cost of restoring
-    if np.any(pop <= [0.03,  0.07, 1e-4]):
+    costs = 0.1 * (effort[0] + effort[1]) + 0.4 * effort[2]  # cost to culling + cost of restoring
+    if np.any(pop <= [0.05,  0.01, 0.001]):
         benefits -= 1
     return benefits - costs
+
+def observe_3pop_restoration(env):
+    rest_obs = -1 + 2 * (
+        (env.current_ab - env.parameters["a_B"]) 
+        / (env.current_ab - env.restored_ab)
+    )
+    return np.float32([*env.state, rest_obs])
 
 class CaribouScipy(gym.Env):
     """A 3-species ecosystem model with two control actions"""
@@ -131,7 +140,7 @@ class CaribouScipy(gym.Env):
         self.threshold = config.get("threshold", np.float32(1e-4))
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
         self.training = config.get("training", True)
-        self.initial_pop = config.get("initial_pop", np.float32([0.3, 0.15, 0.05]))
+        self.initial_pop = np.float32(config.get("initial_pop", [0.268, 0.023, 0.079]))
         #
         self.current_am = 15.32
         self.restored_am = 11.00
@@ -170,7 +179,7 @@ class CaribouScipy(gym.Env):
         self.harvest = config.get("harvest", harvest)
         self.utility = config.get("utility", utility)
         self.observe = config.get(
-            "observe", lambda state: state
+            "observe", observe_3pop_restoration
         )  # default to perfectly observed case
         self.bound = 2
 
@@ -180,8 +189,8 @@ class CaribouScipy(gym.Env):
             dtype=np.float32,
         )
         self.observation_space = gym.spaces.Box(
-            np.array([-1, -1, -1], dtype=np.float32),
-            np.array([1, 1, 1], dtype=np.float32),
+            np.array([-1, -1, -1, -1], dtype=np.float32),
+            np.array([1, 1, 1, 1], dtype=np.float32),
             dtype=np.float32,
         )
         self.reset(seed=config.get("seed", None))
@@ -193,7 +202,7 @@ class CaribouScipy(gym.Env):
         )
         self.state = self.state_units(self.true_initial_pop)
         info = {}
-        return self.observe(self.state), info
+        return self.observe(self), info
 
     def step(self, action):
         action = np.clip(action, self.action_space.low, self.action_space.high)
@@ -216,7 +225,7 @@ class CaribouScipy(gym.Env):
         truncated = bool(self.timestep > self.Tmax) # or bool(any(nextpop < 1e-7))
         
         self.state = self.state_units(nextpop)  # transform into [-1, 1] space
-        observation = self.observe(self.state)  # same as self.state
+        observation = self.observe(self)  # same as self.state
         return observation, reward, False, truncated, {}
 
     def state_units(self, pop):
