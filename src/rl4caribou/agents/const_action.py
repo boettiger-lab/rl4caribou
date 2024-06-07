@@ -1,7 +1,7 @@
 import numpy as np
 
 class constAction:
-    def __init__(self, mortality_vec=np.zeros(2, dtype=np.float32), env = None, **kwargs):
+    def __init__(self, mortality_vec=np.zeros(3, dtype=np.float32), env = None, **kwargs):
         #
         # preprocess
         if isinstance(mortality_vec, list):
