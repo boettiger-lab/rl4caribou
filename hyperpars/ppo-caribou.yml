@@ -35,13 +35,18 @@ algo_config:
 
 # env
 env_id: "CaribouScipy"
-config: {}
+config: {"r_b":.25 } #this is what is passed into the creation of the environment, could pass diff param values here to change the defaults (instead of messing with the params defined in caribou_ode.py)
 n_envs: 12
 
-# io
-repo: "cboettig/rl-ecology"
-save_path: "../saved_agents"
-
+tensorboard: "/home/rstudio/logs"
+#total_timesteps: 50000
+total_timesteps: 5000000
+use_sde: True
+repo: "boettiger-lab/rl4eco"
+save_path: "./saved_agents"
+id: "3"
+#rppo - ppo that has memory (should be better than PPO but hard to train lol) 
+#td3 - giving some weird errors
+#tqc is actually better if we can give it enough time to run
 # misc
-# id: ""
 additional_imports: ["torch"]

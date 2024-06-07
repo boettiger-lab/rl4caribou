@@ -49,35 +49,35 @@ def ode_func(y, t, effort, p):
 ##
 ## Param vals taken from https://doi.org/10.1016/j.ecolmodel.2019.108891
 ##
-am = {"current": 15.32, "full_rest": 11.00}
-ab = {"current": 51.45, "full_rest": 26.39}
+#am = {"current": 15.32, "full_rest": 11.00}
+#ab = {"current": 51.45, "full_rest": 26.39}
 
-parameters = {
-    "r_m": np.float32(0.39),
-    "r_b": np.float32(0.30),
+#parameters = {
+#    "r_m": np.float32(0.39),
+#    "r_b": np.float32(0.30),
     #
-    "alpha_mm": np.float32(1),
-    "alpha_bb": np.float32(1),
-    "alpha_bm": np.float32(1),
-    "alpha_mb": np.float32(1),
+#    "alpha_mm": np.float32(1),
+#    "alpha_bb": np.float32(1),
+#    "alpha_bm": np.float32(1),
+#    "alpha_mb": np.float32(1),
     #
-    "a_M": am["current"],
-    "a_B": ab["current"],
+ #   "a_M": am["current"],
+#    "a_B": ab["current"],
     #
-    "K_m": np.float32(1.1),
-    "K_b": np.float32(0.40),
+#    "K_m": np.float32(1.1),
+#    "K_b": np.float32(0.40),
     #
-    "h_M": np.float32(0.112),
-    "h_B": np.float32(0.112),
+#    "h_M": np.float32(0.112),
+#    "h_B": np.float32(0.112),
     #
-    "x": np.float32(2),
-    "u": np.float32(1),
-    "d": np.float32(1),
+#    "x": np.float32(2),
+#    "u": np.float32(1),
+#    "d": np.float32(1),
     #
-    "sigma_M": np.float32(0.05),
-    "sigma_B": np.float32(0.05),
-    "sigma_W": np.float32(0.05),
-}
+#    "sigma_M": np.float32(0.05),
+#    "sigma_B": np.float32(0.05),
+#    "sigma_W": np.float32(0.05),
+#}
 #
 # computed using scipy's fsolve (coordinates where d Pops / dt = 0)
 singularities = [
