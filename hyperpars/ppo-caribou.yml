@@ -14,7 +14,7 @@
 algo: "PPO"
 total_timesteps: 5000000
 algo_config:
-    tensorboard_log: "../../../logs"
+    tensorboard_log: "../../logs"
     #
     policy: 'MlpPolicy'
     # batch_size: 512
@@ -43,8 +43,8 @@ tensorboard: "/home/rstudio/logs"
 total_timesteps: 5000000
 use_sde: True
 repo: "boettiger-lab/rl4eco"
-save_path: "./saved_agents"
-id: "3"
+save_path: "../saved_agents"
+id: "LFupdate"
 #rppo - ppo that has memory (should be better than PPO but hard to train lol) 
 #td3 - giving some weird errors
 #tqc is actually better if we can give it enough time to run
