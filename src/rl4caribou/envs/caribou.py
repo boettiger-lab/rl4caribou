@@ -191,7 +191,7 @@ class Caribou(gym.Env):
     def population_units(self):
         pop = (self.state + 1) * self.bound / 2
         return np.clip(
-            pop, np.repeat(0, pop.__len__()), np.repeat(np.Inf, pop.__len__())
+            pop, np.repeat(0, len(pop)), np.repeat(None, len(pop))
         )
 
 
