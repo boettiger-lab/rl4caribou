@@ -63,9 +63,9 @@ def sb3_train(config_file, **kwargs):
         options['algo_config']['policy_kwargs'] = eval(options['algo_config']['policy_kwargs'])
     
     ALGO = algorithm(options["algo"])
-    if "id" in options:
-        options["id"] = "-" + options["id"]
-    model_id = options["algo"] + "-" + options["env_id"]  + options.get("id", "")
+    # if "id" in options:
+    #     options["id"] = "-" + options["id"]
+    model_id = options["algo"] + "-" + options["env_id"] # + options.get("id", "")
     save_id = os.path.join(options["save_path"], model_id)
 
     model = ALGO(
