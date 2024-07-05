@@ -1,24 +1,19 @@
 import gymnasium as gym
 import numpy as np
 from scipy.integrate import odeint
-# import nbkode
 
-def dynamics_scipy(pop, effort, p, timestep, singularities):
+from rl4caribou.envs.reproducibility import get_noise
+
+def dynamics_scipy(*, pop, effort, p, timestep, singularities, noise):
     #
     # parameters of the ODE are s.t. t is in years, so lets make the time-step a tenth of a year
     # (this ad hoc rule gives better convergence than if we set dt = 1 full year)
     dt = 1./12
     t_interval = np.float32([timestep, timestep+dt])
     y0 = pop 
-    timestep_randomness = (
-        np.float32(
-            [p['sigma_M'],  p['sigma_B'],  p['sigma_W']]
-        ) *
-        np.random.normal(size=3)
-    )
     new_pop = odeint(ode_func, y0, t_interval, args=(effort, p), tcrit=singularities)[1]
     
-    return new_pop + timestep_randomness * dt
+    return new_pop + noise[timestep] * dt
 
 def ode_func(y, t, effort, p):
     M, B, W = y
@@ -78,30 +73,6 @@ parameters = {
     "sigma_B": np.float32(0.05),
     "sigma_W": np.float32(0.05),
 }
-#
-# computed using scipy's fsolve (coordinates where d Pops / dt = 0)
-singularities = [
-    np.array([1.1000000238415355, 0, 0]),
-    np.array([0.26788470722361574, 0.022792841445996415, 0.07873609043869849]),
-    np.array([0, 0.4000000059610799, 0]),
-    np.array([0, 0.14794518267150766, 0.027967723350836204]),
-    np.array([0.2711216103310206, 0, 0.0796758786194987]),
-    np.array([0, 0, 0]),
-]
-
-# def numba_func(y,t,effort):
-#     global parameters
-#     return ode_func(y, t, effort, parameters)
-
-# def dynamics_numba(t, pop, effort):
-#     #
-#     y0 = pop 
-#     solver = nbkode.ForwardEuler(numba_func, t, y0, params=effort)
-#     #
-#     t_interval = np.float32([t, t+1])
-#     ts, ys = solver.run(t_interval)
-#     return ys[1]
-    
 
 ##
 ## Harvest, utility
@@ -114,12 +85,32 @@ def harvest(pop, effort):
     return pop
 
 
-def utility(pop, effort):
+def utility(pop, effort, *args, **kwargs):
     benefits = 1 * pop[1]  # benefit from Caribou
     costs = 0.1 * (effort[0] + effort[1]) + 0.4 * effort[2]  # cost to culling + cost of restoring
     if np.any(pop <= [0.05,  0.01, 0.001]):
         benefits -= 1
     return benefits - costs
+
+def utility2(pop, effort, used_budget, budget, *args, **kwargs):
+    # caribou health
+    reward = 1 * pop[1]
+
+    # ecosystem balance
+    if np.any(pop <= [0.05,  0.01, 0.001]):
+        reward -= 1
+
+    # budget
+    if used_budget > budget:
+        reward -= 5
+
+    # choose only one strategy at the same time
+    numerical_threshold = 10**(-4)
+    nontrivial_efforts = [1 if eff > numerical_threshold else 0 for eff in effort]
+    if sum(nontrivial_efforts) > 1:
+        reward -= 5
+    
+    return reward
 
 def observe_3pop_restoration(env):
     rest_obs = -1 + 2 * (
@@ -175,13 +166,26 @@ class CaribouScipy(gym.Env):
         self.a_restoration_change = config.get("a_restoration_change", 0.1)
         #
         self.singularities = config.get("singularities", None)
-        self.dynamics = config.get("dynamics", dynamics_scipy)
         self.harvest = config.get("harvest", harvest)
-        self.utility = config.get("utility", utility)
+        
+        self.utility = config.get("utility", utility2)
+        self.budget = config.get('budget', 5)
+        self.w_cull_cost = config.get('w_cull_cost', 0.1)
+        self.m_cull_cost = config.get('m_cull_cost', 0.1)
+        self.LF_rest_cost = config.get('LF_rest_cost', 0.4)
+        
         self.observe = config.get(
             "observe", observe_3pop_restoration
         )  # default to perfectly observed case
         self.bound = 2
+        
+        self.dynamics = config.get("dynamics", dynamics_scipy)
+        #
+        if "noise" in config:
+            self.fixed_noise = config["noise"]
+        else:
+            self.fixed_noise = None
+
 
         self.action_space = gym.spaces.Box(
             np.array([-1, -1, -1], dtype=np.float32),
@@ -197,10 +201,22 @@ class CaribouScipy(gym.Env):
 
     def reset(self, *, seed=None, options=None):
         self.timestep = 0
-        self.true_initial_pop = self.initial_pop + np.multiply(
-            self.initial_pop, np.float32(self.init_sigma * np.random.normal(size=3))
+        self.used_budget = 0
+        self.true_initial_pop = (
+            self.initial_pop 
+            # + np.multiply(
+            #     self.initial_pop, np.float32(self.init_sigma * np.random.normal(size=3))
         )
         self.state = self.state_units(self.true_initial_pop)
+        if self.fixed_noise is None:
+            self.noise = get_noise(
+                self.Tmax, 
+                self.parameters["sigma_M"],
+                self.parameters["sigma_B"],
+                self.parameters["sigma_W"],
+            )
+        else:
+            self.noise = self.fixed_noise
         info = {}
         return self.observe(self), info
 
@@ -208,10 +224,20 @@ class CaribouScipy(gym.Env):
         action = np.clip(action, self.action_space.low, self.action_space.high)
         pop = self.population_units()  # current state in natural units
         effort = (action + 1.0) / 2 # (moose_cull, wolf_cull, restoration_intensity)
+        self.used_budget += ( # shorthand for self.used_budget = self.used_budget + (...)
+            effort[0] * self.m_cull_cost
+            + effort[1] * self.w_cull_cost
+            + effort[2] * self.LF_rest_cost
+        )
 
         # harvest and recruitment
         nextpop = self.dynamics(
-            pop, effort, self.parameters, self.timestep, singularities=self.singularities
+            pop=pop, 
+            effort=effort, 
+            p=self.parameters, 
+            timestep = self.timestep, 
+            singularities=self.singularities,
+            noise=self.noise,
         )
         
         # restoration
@@ -219,10 +245,10 @@ class CaribouScipy(gym.Env):
         self.parameters["a_B"] = self.parameters["a_B"] - (self.parameters["a_B"] - self.restored_ab) * effort[2] * self.a_restoration_change
         
         ## linear approx to rewards
-        reward = self.utility((pop+nextpop)/2., effort)
+        reward = self.utility((pop+nextpop)/2., effort, self.used_budget, self.budget)
 
         self.timestep += 1
-        truncated = bool(self.timestep > self.Tmax) # or bool(any(nextpop < 1e-7))
+        truncated = bool(self.timestep >= self.Tmax) # or bool(any(nextpop < 1e-7))
         
         self.state = self.state_units(nextpop)  # transform into [-1, 1] space
         observation = self.observe(self)  # same as self.state
