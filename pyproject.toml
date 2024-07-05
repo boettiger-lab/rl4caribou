@@ -5,7 +5,10 @@ version = "1.0.0"
 dependencies = ["gymnasium",
                 "numpy",
                 "matplotlib",
-                "typing"]
+                "typing",
+                "scikit-optimize",
+                "scikit-learn==1.4.2",
+                ]
 
 [project.optional-dependencies]
 tests = ["pytest", "pytest-cov", "stable_baselines3", "scipy"]
