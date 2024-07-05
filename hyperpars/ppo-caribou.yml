@@ -1,7 +1,7 @@
 # stable-baselines3 configuration
 algo: "PPO"
-total_timesteps: 5000000
-progress_bar: True
+total_timesteps: 3000000
+progress_bar: False
 algo_config:
     tensorboard_log: "../../../logs"
     #
@@ -15,7 +15,7 @@ algo_config:
     # max_grad_norm: 5
     # vf_coef: 0.19
     use_sde: True
-    policy_kwargs: "dict(net_arch=[64, 32, 16])"
+    policy_kwargs: "dict(net_arch=[64, 64, 32])"
     # policy_kwargs: "dict(log_std_init=-3.29, ortho_init=False, net_arch=[256, 128])"
     # in policy_kwargs: net_arch=[400, 300]
     # policy: 'MlpPolicy'
@@ -33,5 +33,5 @@ repo: "cboettig/rl-ecology"
 save_path: "../saved_agents"
 
 # misc
-id: "64-32-16"
+id: "64-64-32"
 additional_imports: ["torch"]
