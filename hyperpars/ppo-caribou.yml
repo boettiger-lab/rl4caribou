@@ -35,7 +35,7 @@ algo_config:
 
 # env
 env_id: "CaribouScipy"
-config: {"r_b":.25 } #this is what is passed into the creation of the environment, could pass diff param values here to change the defaults (instead of messing with the params defined in caribou_ode.py)
+config: {} #this is what is passed into the creation of the environment, could pass diff param values here to change the defaults (instead of messing with the params defined in caribou_ode.py)
 n_envs: 12
 
 tensorboard: "/home/rstudio/logs"
@@ -44,7 +44,7 @@ total_timesteps: 5000000
 use_sde: True
 repo: "boettiger-lab/rl4eco"
 save_path: "../saved_agents"
-id: "LFupdate"
+id: "LFupdate_shortTF1strat"
 #rppo - ppo that has memory (should be better than PPO but hard to train lol) 
 #td3 - giving some weird errors
 #tqc is actually better if we can give it enough time to run

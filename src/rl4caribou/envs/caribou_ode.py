@@ -5,9 +5,9 @@ from scipy.integrate import odeint
 
 def dynamics_scipy(pop, effort, p, timestep, singularities):
     #
-    # parameters of the ODE are s.t. t is in years, so lets make the time-step a tenth of a year
+    # parameters of the ODE are s.t. t is in years, so lets make the time-step a twelfth of a year
     # (this ad hoc rule gives better convergence than if we set dt = 1 full year)
-    dt = 1./12
+    dt = 1
     t_interval = np.float32([timestep, timestep+dt])
     y0 = pop 
     timestep_randomness = (
@@ -114,19 +114,40 @@ def harvest(pop, effort):
     return pop
 
 
-def utility(pop, effort):
+def utility(pop, effort, *args, **kwargs):
     benefits = 1 * pop[1]  # benefit from Caribou
     costs = 0.1 * (effort[0] + effort[1]) + 0.4 * effort[2]  # cost to culling + cost of restoring
-    if np.any(pop <= [0.05,  0.01, 0.001]):
+    if np.any(pop <= [0.01,  0.05, 0.001]):
         benefits -= 1
     return benefits - costs
 
+def utility2(pop, effort, used_budget, budget, *args, **kwargs):
+    # caribou health
+    reward = 1 * pop[1]
+
+    # ecosystem balance
+    if np.any(pop <= [0.05,  0.01, 0.001]):
+        reward -= 1
+
+    # budget
+    if used_budget > budget:
+        reward -= 5
+
+    # choose only one strategy at the same time
+    numerical_threshold = 10**(-4)
+    nontrivial_efforts = [1 if eff > numerical_threshold else 0 for eff in effort]
+    if sum(nontrivial_efforts) > 1:
+        reward -= 5
+    
+    return reward
+
 def observe_3pop_restoration(env):
-    rest_obs = -1 + 2 * (
+    rest_obs = -1 + 2 * (   #get a value between -1 and 1
         (env.current_ab - env.parameters["a_B"]) 
         / (env.current_ab - env.restored_ab)
     )
     return np.float32([*env.state, rest_obs])
+
 
 class CaribouScipy(gym.Env):
     """A 3-species ecosystem model with two control actions"""
@@ -135,7 +156,7 @@ class CaribouScipy(gym.Env):
         config = config or {}
 
         ## these parameters may be specified in config
-        self.Tmax = config.get("Tmax", 800)
+        self.Tmax = config.get("Tmax", 100)
         self.max_episode_steps = self.Tmax
         self.threshold = config.get("threshold", np.float32(1e-4))
         self.init_sigma = config.get("init_sigma", np.float32(1e-3))
@@ -159,10 +180,10 @@ class CaribouScipy(gym.Env):
             "a_B": self.current_ab,
             #
             "K_m": config.get("K_m", np.float32(1.1)),
-            "K_b": config.get("K_b", np.float32(0.40)),
+            "K_b": config.get("K_b", np.float32(0.5)),
             #
             "h_M": config.get("h_M", np.float32(0.112)),
-            "h_B": config.get("h_B", np.float32(0.112)),
+            "h_B": config.get("h_B", np.float32(0.110)),
             #
             "x": config.get("x", np.float32(2)),
             "u": config.get("u", np.float32(1)),
@@ -177,7 +198,14 @@ class CaribouScipy(gym.Env):
         self.singularities = config.get("singularities", None)
         self.dynamics = config.get("dynamics", dynamics_scipy)
         self.harvest = config.get("harvest", harvest)
-        self.utility = config.get("utility", utility)
+        #self.utility = config.get("utility", utility)
+        self.utility = config.get("utility", utility2)
+        self.budget = config.get('budget', 5)
+        self.w_cull_cost = config.get('w_cull_cost', 0.1)
+        self.m_cull_cost = config.get('m_cull_cost', 0.1)
+        self.LF_rest_cost = config.get('LF_rest_cost', 0.4)
+        self.used_budget = 0
+        
         self.observe = config.get(
             "observe", observe_3pop_restoration
         )  # default to perfectly observed case
@@ -208,7 +236,12 @@ class CaribouScipy(gym.Env):
         action = np.clip(action, self.action_space.low, self.action_space.high)
         pop = self.population_units()  # current state in natural units
         effort = (action + 1.0) / 2 # (moose_cull, wolf_cull, restoration_intensity)
-
+        
+        self.used_budget += ( # shorthand for self.used_budget = self.used_budget + (...)
+            effort[0] * self.m_cull_cost
+            + effort[1] * self.w_cull_cost
+            + effort[2] * self.LF_rest_cost
+        )
         # harvest and recruitment
         nextpop = self.dynamics(
             pop, effort, self.parameters, self.timestep, singularities=self.singularities
@@ -219,7 +252,8 @@ class CaribouScipy(gym.Env):
         self.parameters["a_B"] = self.parameters["a_B"] - (self.parameters["a_B"] - self.restored_ab) * effort[2] * self.a_restoration_change
         
         ## linear approx to rewards
-        reward = self.utility((pop+nextpop)/2., effort)
+        #reward = self.utility((pop+nextpop)/2., effort)
+        reward = self.utility((pop+nextpop)/2., effort, self.used_budget, self.budget)
 
         self.timestep += 1
         truncated = bool(self.timestep > self.Tmax) # or bool(any(nextpop < 1e-7))
@@ -242,7 +276,7 @@ class CaribouScipy(gym.Env):
         return np.clip(
             pop, np.repeat(0, pop.__len__()), np.repeat(np.Inf, pop.__len__())
         )
-
+        
 
 
 # class CaribouNumba(gym.Env):
