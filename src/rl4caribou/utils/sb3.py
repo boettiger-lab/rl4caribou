@@ -121,7 +121,7 @@ def sb3_train(config_file, **kwargs):
     return save_id, options
 
 
-def sb3_train_save_checkpoints(config_file, checkpoint_freq=500_000, checkpoint_start=4_000_000, **kwargs):
+def sb3_train_save_checkpoints(config_file, checkpoint_freq=500_000, checkpoint_start=3000_000, **kwargs):
     with open(config_file, "r") as stream:
         options = yaml.safe_load(stream)
         options = {**options, **kwargs}
