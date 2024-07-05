@@ -240,7 +240,7 @@ class CaribouScipy(gym.Env):
     def population_units(self):
         pop = (self.state + 1) * self.bound / 2
         return np.clip(
-            pop, np.repeat(0, len(pop)), None)
+            pop, np.repeat(0, len(pop)), None
         )
 
 
