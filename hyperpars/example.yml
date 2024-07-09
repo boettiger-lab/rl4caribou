@@ -1,0 +1,20 @@
+# stable-baselines3 configuration
+algo: "PPO"
+total_timesteps: 100000
+algo_config:
+    tensorboard_log: "../../../logs"
+    #
+    policy: 'MlpPolicy'
+
+
+# env
+env_id: "CaribouScipy"
+config: {}
+n_envs: 12
+
+# io
+repo: "cboettig/rl-ecology"
+save_path: "../saved_agents"
+
+# misc
+# additional_imports: ["torch"]
