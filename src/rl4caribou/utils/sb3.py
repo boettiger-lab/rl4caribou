@@ -37,7 +37,7 @@ def algorithm(algo):
     }
     return algos[algo]
 
-def sb3_train(config_file, *, progress_bar, identifier, **kwargs):
+def sb3_train(config_file, progress_bar=True, identifier="0", **kwargs):
     with open(config_file, "r") as stream:
         options = yaml.safe_load(stream)
         options = {**options, **kwargs}
