@@ -3,7 +3,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", help="Path config file", type=str)
 parser.add_argument("-pb", "--progress_bar", help="Use  progress bar for training", type=bool, default=True)
-parser.add_argument("-id", "--identifier", help="ID string for saving the agent", type=bool, default="0")
+parser.add_argument("-id", "--identifier", help="ID string for saving the agent", type=str, default="0")
 args = parser.parse_args()
 
 import rl4caribou
@@ -21,7 +21,11 @@ os.chdir(dname)
 # training
 #
 from rl4caribou.utils import sb3_train    
-model_save_id, train_options = sb3_train(abs_filepath, progress_bar=args.progress_bar)
+model_save_id, train_options = sb3_train(
+    abs_filepath, 
+    progress_bar=args.progress_bar, 
+    identifier=args.identifier,
+)
 model_save_id = model_save_id + "_id_" + args.identifier
 
 # hugging face

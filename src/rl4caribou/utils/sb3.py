@@ -36,7 +36,8 @@ def algorithm(algo):
         'tqc': TQC,
     }
     return algos[algo]
-def sb3_train(config_file, **kwargs):
+
+def sb3_train(config_file, progress_bar=True, identifier="0", **kwargs):
     with open(config_file, "r") as stream:
         options = yaml.safe_load(stream)
         options = {**options, **kwargs}
@@ -65,7 +66,7 @@ def sb3_train(config_file, **kwargs):
     ALGO = algorithm(options["algo"])
     # if "id" in options:
     #     options["id"] = "-" + options["id"]
-    model_id = options["algo"] + "-" + options["env_id"] # + options.get("id", "")
+    model_id = options["algo"] + "-" + options["env_id"] + "_id_" + identifier
     save_id = os.path.join(options["save_path"], model_id)
 
     model = ALGO(
@@ -73,7 +74,6 @@ def sb3_train(config_file, **kwargs):
         **options['algo_config']
     )
 
-    progress_bar = options.get("progress_bar", False)
     model.learn(total_timesteps=options["total_timesteps"], tb_log_name=model_id, progress_bar=progress_bar)
 
     os.makedirs(options["save_path"], exist_ok=True)
