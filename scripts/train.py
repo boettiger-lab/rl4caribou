@@ -21,7 +21,11 @@ os.chdir(dname)
 # training
 #
 from rl4caribou.utils import sb3_train    
-model_save_id, train_options = sb3_train(abs_filepath, progress_bar=args.progress_bar)
+model_save_id, train_options = sb3_train(
+    abs_filepath, 
+    progress_bar=args.progress_bar, 
+    identifier=args.identifier,
+)
 model_save_id = model_save_id + "_id_" + args.identifier
 
 # hugging face
