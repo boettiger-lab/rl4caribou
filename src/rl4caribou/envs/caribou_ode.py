@@ -123,10 +123,10 @@ def utility(pop, effort, *args, **kwargs):
 
 def utility2(pop, effort, used_budget, budget, *args, **kwargs):
     # caribou health
-    reward = 1 * pop[1]
+    reward = 10 * pop[1]
 
     # ecosystem balance
-    if np.any(pop <= [0.05,  0.01, 0.001]):
+    if np.any(pop <= 0.01):
         reward -= 1
 
     # budget
@@ -200,7 +200,7 @@ class CaribouScipy(gym.Env):
         self.harvest = config.get("harvest", harvest)
         #self.utility = config.get("utility", utility)
         self.utility = config.get("utility", utility2)
-        self.budget = config.get('budget', 5)
+        self.budget = config.get('budget', 10)
         self.w_cull_cost = config.get('w_cull_cost', 0.1)
         self.m_cull_cost = config.get('m_cull_cost', 0.1)
         self.LF_rest_cost = config.get('LF_rest_cost', 0.4)
